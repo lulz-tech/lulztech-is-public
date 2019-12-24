@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+  registry:
+    image: prom/prometheus
+    restart: always
+    container_name: prometheus
+    volumes:
+      - /opt/srv/services/prometheus/config.yml:/etc/prometheus/prometheus.yml
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.ci.${BASE_DOMAIN}`)"
+      - "traefik.http.routers.prometheus.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+
+networks:
+  default:
+    external:
+      name: traefik

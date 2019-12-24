@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+  registry:
+    image: registry:latest
+    restart: always
+    container_name: registry
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.registry.rule=Host(`registry.ci.${BASE_DOMAIN}`)"
+      - "traefik.http.routers.registry.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.registry.entrypoints=websecure"
+
+networks:
+  default:
+    external:
+      name: traefik

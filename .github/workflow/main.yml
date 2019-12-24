@@ -1,0 +1,32 @@
+name: Update infra
+
+on:
+  push:
+    branches:
+      - master
+      - init
+
+jobs:
+  apply:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Init playbook
+        if: github.ref == 'refs/heads/init'
+        uses: saubermacherag/ansible-playbook-docker-action@v1.2
+        with:
+          playbookName: 'ansible/init.yml'
+          inventoryFile: '${{ secrets.SERVER_NAME }},'
+          extraVars: '-e ansible_ssh_user=root -e ansible_ssh_pass=${{ secrets.ROOT_PASS }} -e sudo_user=${{ secrets.SUDO_USER }} -e sudo_passwd=${{ secrets.SUDO_PASS }}'
+
+      - name: Apply playbook
+            uses: saubermacherag/ansible-playbook-docker-action@v1.2
+            with:
+              playbookName: 'ansible/apply.yml'
+              inventoryFile: '${{ secrets.SERVER_NAME }},'
+              extraVars: '-e sudopasswd=${{ secrets.SUDO_PASS }} -e githubuser=${{ github.actor }} -e githubpassword=${{ secrets.GITHUB_TOKEN }} -e githubrepo=github.com/${{ github.repository }}.git -e ansible_ssh_user=${{ secrets.SUDO_USER }} -e ansible_ssh_pass=${{ secrets.SUDO_PASS }}'
+

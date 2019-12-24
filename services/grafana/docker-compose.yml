@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  grafana:
+    image: grafana/grafana
+    restart: always
+    container_name: grafana
+    volumes:
+      - "grafana-storage:/var/lib/grafana"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.ci.${BASE_DOMAIN}`)"
+      - "traefik.http.routers.grafana.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+
+networks:
+  default:
+    external:
+      name: traefik
+
+volumes:
+  grafana-storage:
+    driver: local
+

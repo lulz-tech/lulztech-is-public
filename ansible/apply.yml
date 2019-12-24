@@ -1,0 +1,15 @@
+- name: Basic provisioning
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    ansible_become_pass: '{{ sudopasswd }}'
+
+  tasks:
+    - name: pull is
+      git:
+        repo: "https://{{ githubuser | urlencode }}:{{ githubpassword }}@{{ githubrepo }}"
+        dest: /opt/srv
+
+    - name: up containers
+      raw: cd /opt/srv && chmod +x ./up-all.sh && ./up-all.sh

@@ -1,0 +1,52 @@
+- name: Basic provisioning
+  hosts: all
+  become: true
+
+  gather_facts: true
+
+  pre_tasks:
+    - name: Loading env vars
+      tags: always
+
+  tasks:
+    - name: apt update
+      apt:
+        update_cache: yes
+
+    - name: apt upgrade
+      apt:
+        name: "*"
+        state: latest
+
+    - name: apt:install HSTS support
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+
+    - name: gpg:add key
+      raw: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+    - name: apt:add repo
+      raw: sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+
+    - name: apt update
+      apt:
+        update_cache: yes
+
+    - name: install docker
+      apt:
+        name: docker-ce
+
+    - name: create docker network
+      raw: docker network create traefik
+
+    - name: add regular user
+      user:
+        name: "{{ sudo_user }}"
+        group:
+          - sudo
+          - docker
+        password: "{{ sudo_passwd }}"

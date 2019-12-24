@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  registry:
+    image: quay.io/prometheus/node-exporter
+    restart: always
+    container_name: node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+
+networks:
+  default:
+    external:
+      name: traefik

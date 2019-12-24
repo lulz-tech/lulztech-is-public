@@ -1,0 +1,20 @@
+version: "3.5"
+
+services:
+  ${container-name}:
+    image: ${registry-domain}/${container-name}
+    restart: always
+    container_name: ${container-name}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.${container-name}-insecure.rule=Host(`${container-host}`)"
+      - "traefik.http.routers.${container-name}-insecure.entrypoints=web"
+      - "traefik.http.middlewares.${container-name}-insecure.redirectscheme.scheme=https"
+      - "traefik.http.routers.${container-name}.rule=Host(`${container-host}`)"
+      - "traefik.http.routers.${container-name}.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.${container-name}.entrypoints=websecure"
+
+networks:
+  default:
+    external:
+      name: traefik

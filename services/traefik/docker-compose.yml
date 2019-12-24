@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    # The official v2.0 Traefik docker image
+    image: traefik:v2.0
+    # Enables the web UI and tells Traefik to listen to docker
+    restart: always
+    container_name: traefik
+    command:
+      # - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.address=:80"
+      - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
+      # - "--certificatesresolvers.tls1.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.mytlschallenge.acme.email=${EMAIL}"
+      - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
+      - "--metrics.prometheus=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`ci.${BASE_DOMAIN}`)"
+      - "traefik.http.routers.api.service=api@internal"
+      #- "traefik.http.routers.api.tls.certresolver=mytlschallenge"
+      #- "traefik.http.routers.api.entrypoints=websecure"
+    ports:
+      # The Web UI (enabled by --api.insecure=true)
+      - "80:80"
+      - "443:443"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+networks:
+  default:
+    external:
+      name: traefik
